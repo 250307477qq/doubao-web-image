@@ -1,28 +1,28 @@
 import requests
-import json
 
-# ========== 你的豆包 API 配置 ==========
+# ========== 豆包 API 配置（替换成你的真实 API_KEY） ==========
 API_KEY = "B676F5EA-75AD-4EC6-8F80-79E4F30CD9ef"
-API_URL = "https://ark.cn-beijing.volces.com/api/v3/text-to-image"
-
-# 文生图请求头
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
 
 def generate_image(prompt: str):
-    """调用豆包 API 生成图片"""
+    # 正确的文生图接口地址
+    url = "https://ark.cn-beijing.volces.com/api/v3/images/generations"
     
-    payload = {
-        "model": "doubao-image",
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        # 必须和你开通的模型一致
+        "model": "doubao-vision-image",
         "prompt": prompt,
         "size": "1024x1024",
-        "num_images": 1
+        "n": 1  # 生成1张
     }
 
     try:
-        response = requests.post(API_URL, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
         result = response.json()
 
         if "data" in result and len(result["data"]) > 0:
@@ -31,12 +31,12 @@ def generate_image(prompt: str):
             print("🖼️ 图片地址：", image_url)
             return image_url
         else:
-            print("❌ 生成失败：", result)
-            return None
-            
+            print("❌ 接口返回异常：", result)
+
     except Exception as e:
-        print("❌ 请求出错：", str(e))
-        return None
+        print("❌ 请求出错：", e)
+        if 'response' in locals():
+            print("响应内容：", response.text)
 
 if __name__ == "__main__":
     print("=== 豆包 AI 图片生成工具 ===")
